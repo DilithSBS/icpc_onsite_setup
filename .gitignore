@@ -15,3 +15,8 @@ $RECYCLE.BIN/
 # Local logs
 *.log
 
+# Contestant credentials & sensitive files
+*credential*
+*credentials*
+contestant_credentials.txt
+contestant_credentials.csv
