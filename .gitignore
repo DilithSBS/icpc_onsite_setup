@@ -1,0 +1,17 @@
+# Temporary build files & test outputs
+*.exe
+*.obj
+*.o
+*.class
+__pycache__/
+*.pyc
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local logs
+*.log
+

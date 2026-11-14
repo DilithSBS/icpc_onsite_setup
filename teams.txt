@@ -1,0 +1,60 @@
+ICPCLK26_G083	just_good	IIT Bombay
+ICPCLK26_G041	2.6 hog riders	Indian Institute of Technology Kanpur
+ICPCLK26_G099	Knurdz Decoherence	University of Moratuwa
+ICPCLK26_G100	Apex Predictors	Sabaragamuwa University of Sri Lanka
+ICPCLK26_G022	Nocturnals	University of Peradeniya
+ICPCLK26_G082	#exclude	Indian Institute of Technology Bombay
+ICPCLK26_G104	FourZeroFour	University of Moratuwa
+ICPCLK26_G098	NeuralStack	APIIT
+ICPCLK26_G050	XOR	University of Moratuwa
+ICPCLK26_G068	EchoBinary	University of Moratuwa
+ICPCLK26_G076	Arceus2004	University of Moratuwa
+ICPCLK26_G017	KodersX	University of Peradeniya
+ICPCLK26_G103	hehe	University of Colombo
+ICPCLK26_G013	trojanHex	University of Moratuwa
+ICPCLK26_G058	Velosphere	University of Moratuwa
+ICPCLK26_G113	Infinite	Ajeenkya DY Patil University
+ICPCLK26_G088	Kok	University of Moratuwa 
+ICPCLK26_G008	Total Chaos Squad	University of Moratuwa
+ICPCLK26_G006	Zero Protocol	University of Peradeniya
+ICPCLK26_G065	Team Hackstreet Boys	University of Moratuwa
+ICPCLK26_G039	Mavericks	SLIIT
+ICPCLK26_G055	Yosync	University of Peradeniya
+ICPCLK26_G038	Runtime Rebels	south eastern university 
+ICPCLK26_G112	Potatato	Lanka Nippon BizTech Institute
+ICPCLK26_G081	PurgyXTeam	Lanka Nippon Biztech Institute
+ICPCLK26_G057	Badgers	University of Moratuwa
+ICPCLK26_G034	Git Happens	SLIIT NORTHERN UNI
+ICPCLK26_G102	Hungry Beasts	The Open University of Sri Lanka
+ICPCLK26_G043	Syntax Samurai	The Open University of Sri Lanka
+ICPCLK26_G087	BLE	University of Moratuwa 
+ICPCLK26_G093	Proof or Perish	Indian Institute of Technology Kharagpur
+ICPCLK26_G070	DecaMinds	Sabaragamuwa University of Sri Lanka 
+ICPCLK26_G048	CodeMode	srilanka institute of information technology
+ICPCLK26_G010	Nasakarar	University of Peradeniya
+ICPCLK26_G015	TheWeak3	Faculty of Technology, University of Delhi
+ICPCLK26_G109	BinaryBeast	University of Jaffna
+ICPCLK26_G107	TLE on test 29	IIT KANPUR
+ICPCLK26_G019	Vizhaiyor	University of Peradeniya
+ICPCLK26_G023	Hackophiles	University of Peradeniya
+ICPCLK26_G074	Penguins	University Of Peradeniya
+ICPCLK26_G051	NovaCore	University of Peradeniya
+ICPCLK26_G072	RePeaTers	University of Sri Jayewardenepura
+ICPCLK26_G066	SANDbox	University of Moratuwa
+ICPCLK26_G040	The Falcon's Xtreme	General Sir John Kotelawala Defence University
+ICPCLK26_G004	infinite_coders	University of Peradeniya
+ICPCLK26_G002	Bug slayers	University of Peradeniya 
+ICPCLK26_G049	CodingDucks	University of Moratuwa
+ICPCLK26_G061	std::win	University of Moratuwa
+ICPCLK26_G016	Code Blooded	University of Colombo School of Computing 
+ICPCLK26_G009	Atreides	Sri Lanka Institute of Information Technology
+ICPCLK26_G011	alt+f4	University of Peradeniya
+ICPCLK26_G063	Omega n	University of Peradeniya 
+ICPCLK26_G027	CodeForge	University of Peradeniya
+ICPCLK26_G018	404	ICBT Colombo
+ICPCLK26_G069	Heuristic Logicians	Management and Science Institute
+ICPCLK26_G071	Codefevers	University Of Kelaniya
+ICPCLK26_G060	Qorvenz	University of Moratuwa
+ICPCLK26_G044	Amethyst	NIBM
+ICPCLK26_G021	KpolitX	LNBTI University 
+ICPCLK26_G089	Error 404	SLIIT | Sri Lanka Institute of Information Technology

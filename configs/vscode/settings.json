@@ -1,0 +1,35 @@
+{
+    "telemetry.telemetryLevel": "off",
+    "update.mode": "none",
+    "extensions.autoCheckUpdates": false,
+    "extensions.autoUpdate": false,
+    "workbench.enableExperiments": false,
+    "npm.fetchOnlinePackageInfo": false,
+    "git.autofetch": false,
+    "security.workspace.trust.enabled": false,
+
+    "editor.fontSize": 15,
+    "editor.fontFamily": "'Consolas', 'Courier New', monospace",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": true,
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": false,
+    "editor.renderWhitespace": "selection",
+    "editor.lineNumbers": "on",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1500,
+    "files.trimTrailingWhitespace": false,
+
+    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+
+    "workbench.startupEditor": "newUntitledFile",
+    "workbench.tips.enabled": false
+}
+
