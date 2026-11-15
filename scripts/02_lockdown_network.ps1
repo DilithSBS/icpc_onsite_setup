@@ -4,23 +4,29 @@
 .DESCRIPTION
     - Turns ON Windows Firewall across all profiles (Domain, Private, Public).
     - Sets Default Outbound Action to BLOCK (stops all internet access).
-    - Whitelists only:
-        * Local Contest Subnet / Server IP (DOMjudge, PC^2, local printing server)
-        * DHCP (Ports 67, 68 UDP) so the machine retains its IP address
-        * ICMPv4 (Ping) to local subnet for diagnosis
+    - Whitelists ONLY:
+        * The specific DOMjudge / Contest Server IP address (HTTP/HTTPS/API)
+        * DHCP (Ports 67, 68 UDP) so the machine retains its IP address from the router/switch
+        * ICMPv4 (Ping) ONLY to the DOMjudge server for connectivity diagnostics
         * Loopback (127.0.0.1) for local processes
+    - By restricting traffic exclusively to $ServerIP, contestant PCs cannot even talk to each
+      other across the local LAN, preventing inter-team cheating.
 .NOTES
-    Modify $ContestSubnet and $ServerIP to match your lab's network plan.
+    Set $ServerIP to match your DOMjudge server's exact IP address.
 #>
 
 param(
-    # The local subnet of the lab where the contest server is hosted
-    [string]$ContestSubnet = "192.168.1.0/24",
-
-    # Specific Contest Server IP (DOMjudge / PC^2 / Kattis Local)
+    # The exact IP address of your DOMjudge / Contest Server
     [string]$ServerIP = "192.168.1.100",
 
-    # Optional printing server or secondary server IP if applicable
+    # Set to $true to restrict traffic ONLY to $ServerIP (Highest Security).
+    # Set to $false to allow the entire local subnet.
+    [bool]$StrictServerOnly = $true,
+
+    # Local subnet (only used if $StrictServerOnly is $false)
+    [string]$ContestSubnet = "192.168.1.0/24",
+
+    # Optional printing server IP if your lab has a network printer queue
     [string]$PrintServerIP = ""
 )
 
@@ -28,8 +34,12 @@ Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host " [Step 2] Applying Offline Network Lockdown" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 
-Write-Host "[INFO] Local Lab Subnet: $ContestSubnet" -ForegroundColor Gray
-Write-Host "[INFO] Contest Server IP: $ServerIP" -ForegroundColor Gray
+Write-Host "[INFO] Target DOMjudge Server IP : $ServerIP" -ForegroundColor Yellow
+if ($StrictServerOnly) {
+    Write-Host "[INFO] Security Mode            : STRICT (DOMjudge Server ONLY - No other LAN/PCs allowed)" -ForegroundColor Magenta
+} else {
+    Write-Host "[INFO] Security Mode            : SUBNET ($ContestSubnet)" -ForegroundColor Gray
+}
 
 # 1. Ensure Windows Firewall Service (MpsSvc) is running
 $fwService = Get-Service -Name "mpssvc" -ErrorAction SilentlyContinue
@@ -71,23 +81,41 @@ New-NetFirewallRule -DisplayName "ICPC-Allow-Loopback" `
                     -RemoteAddress "127.0.0.1" `
                     -Description "ICPC: Localhost processes" | Out-Null
 
-# Allow communication to Contest Subnet (Web, DOMjudge, SSH, Local printing)
-Write-Host "[INFO] Adding Rule: Allow Contest Subnet ($ContestSubnet)..." -ForegroundColor Yellow
-New-NetFirewallRule -DisplayName "ICPC-Allow-Subnet" `
-                    -Direction Outbound `
-                    -Action Allow `
-                    -RemoteAddress $ContestSubnet `
-                    -Description "ICPC: Communication with local contest network" | Out-Null
+if ($StrictServerOnly) {
+    # Highest security: Allow outbound communication ONLY to the specific DOMserver IP
+    Write-Host "[INFO] Adding Rule: Allow Traffic ONLY to DOMjudge Server ($ServerIP)..." -ForegroundColor Green
+    New-NetFirewallRule -DisplayName "ICPC-Allow-DOMServer" `
+                        -Direction Outbound `
+                        -Action Allow `
+                        -RemoteAddress $ServerIP `
+                        -Description "ICPC: Allow traffic exclusively to DOMjudge server" | Out-Null
 
-# Allow ICMP Echo Request (Ping) inside the subnet
-Write-Host "[INFO] Adding Rule: Allow ICMP Echo (Ping) to Subnet..." -ForegroundColor Yellow
-New-NetFirewallRule -DisplayName "ICPC-Allow-ICMP-Ping" `
-                    -Direction Outbound `
-                    -Action Allow `
-                    -Protocol ICMPv4 `
-                    -RemoteAddress $ContestSubnet `
-                    -Description "ICPC: Ping server for diagnostics" | Out-Null
+    # Allow ICMP Echo (Ping) ONLY to DOMjudge server for test diagnostics
+    Write-Host "[INFO] Adding Rule: Allow Ping ONLY to DOMjudge Server ($ServerIP)..." -ForegroundColor Green
+    New-NetFirewallRule -DisplayName "ICPC-Allow-ICMP-DOMServer" `
+                        -Direction Outbound `
+                        -Action Allow `
+                        -Protocol ICMPv4 `
+                        -RemoteAddress $ServerIP `
+                        -Description "ICPC: Ping DOMjudge server for diagnostics" | Out-Null
+} else {
+    # Subnet mode: Allow communication to the entire subnet
+    Write-Host "[INFO] Adding Rule: Allow Entire Subnet ($ContestSubnet)..." -ForegroundColor Yellow
+    New-NetFirewallRule -DisplayName "ICPC-Allow-Subnet" `
+                        -Direction Outbound `
+                        -Action Allow `
+                        -RemoteAddress $ContestSubnet `
+                        -Description "ICPC: Communication with local contest network" | Out-Null
 
+    New-NetFirewallRule -DisplayName "ICPC-Allow-ICMP-Ping" `
+                        -Direction Outbound `
+                        -Action Allow `
+                        -Protocol ICMPv4 `
+                        -RemoteAddress $ContestSubnet `
+                        -Description "ICPC: Ping subnet for diagnostics" | Out-Null
+}
+
+# Optional Print Server rule
 if (-not [string]::IsNullOrWhiteSpace($PrintServerIP)) {
     Write-Host "[INFO] Adding Rule: Allow Print Server ($PrintServerIP)..." -ForegroundColor Yellow
     New-NetFirewallRule -DisplayName "ICPC-Allow-PrintServer" `
@@ -99,7 +127,6 @@ if (-not [string]::IsNullOrWhiteSpace($PrintServerIP)) {
 
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host " Network lockdown successfully applied!" -ForegroundColor Green
-Write-Host " - All Internet and external WAN traffic is BLOCKED." -ForegroundColor Green
-Write-Host " - Only traffic to $ContestSubnet is PERMITTED." -ForegroundColor Green
+Write-Host " - All Internet, WAN, and peer PC communication is BLOCKED." -ForegroundColor Green
+Write-Host " - Outbound traffic is PERMITTED ONLY to DOMserver: $ServerIP" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green
-

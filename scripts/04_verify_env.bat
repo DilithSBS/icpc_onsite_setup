@@ -5,7 +5,7 @@ setlocal EnableDelayedExpansion
 :: ICPC Environment Smoke Test & Verification
 :: -------------------------------------------------------------
 
-set "SERVER_IP=192.168.1.100"
+if not "%~1"=="" (set "SERVER_IP=%~1") else (set "SERVER_IP=192.168.1.100")
 set "TEMP_DIR=%TEMP%\icpc_verify_%RANDOM%"
 set "SCRIPT_DIR=%~dp0"
 set "TEST_DIR=%SCRIPT_DIR%..\configs\test_programs"
