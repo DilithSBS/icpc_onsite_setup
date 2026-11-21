@@ -23,7 +23,7 @@ echo ------------------------------------------------------------
 
 where gcc >nul 2>&1
 if %errorLevel% equ 0 (
-    echo   [PASS] GCC (C Compiler)
+    echo   [PASS] GCC - C Compiler
 ) else (
     echo   [FAIL] GCC NOT found in PATH!
     set /a FAIL_COUNT+=1
@@ -31,7 +31,7 @@ if %errorLevel% equ 0 (
 
 where g++ >nul 2>&1
 if %errorLevel% equ 0 (
-    echo   [PASS] G++ (C++ Compiler)
+    echo   [PASS] G++ - C++ Compiler
 ) else (
     echo   [FAIL] G++ NOT found in PATH!
     set /a FAIL_COUNT+=1
@@ -39,7 +39,7 @@ if %errorLevel% equ 0 (
 
 where javac >nul 2>&1
 if %errorLevel% equ 0 (
-    echo   [PASS] Java Compiler (javac)
+    echo   [PASS] Java Compiler - javac
 ) else (
     echo   [FAIL] javac NOT found in PATH!
     set /a FAIL_COUNT+=1
@@ -55,9 +55,9 @@ if %errorLevel% equ 0 (
 
 where code >nul 2>&1
 if %errorLevel% equ 0 (
-    echo   [PASS] Visual Studio Code CLI (code)
+    echo   [PASS] Visual Studio Code CLI - code
 ) else (
-    echo   [WARNING] 'code' command not in PATH (VS Code may still work via GUI)
+    echo   [WARNING] 'code' command not in PATH - VS Code may still work via GUI
 )
 
 echo.
@@ -84,7 +84,7 @@ if %errorLevel% equ 0 (
     g++ -std=c++17 "%TEST_DIR%\test.cpp" -o "%TEMP_DIR%\test_cpp.exe" >nul 2>&1
     if exist "%TEMP_DIR%\test_cpp.exe" (
         "%TEMP_DIR%\test_cpp.exe"
-        echo   [PASS] C++ (STL) compilation and execution succeeded.
+        echo   [PASS] C++ STL compilation and execution succeeded.
     ) else (
         echo   [FAIL] C++ compilation failed!
         set /a FAIL_COUNT+=1
@@ -118,24 +118,24 @@ if %errorLevel% equ 0 (
 )
 
 echo.
-echo [3] Checking Network Security & Isolation:
+echo [3] Checking Network Security ^& Isolation:
 echo ------------------------------------------------------------
 
 :: Test LAN/Server Reachability
-echo Pinging Contest Server (%SERVER_IP%)...
+echo Pinging Contest Server: %SERVER_IP%...
 ping -n 1 -w 1500 %SERVER_IP% >nul 2>&1
 if %errorLevel% equ 0 (
     echo   [PASS] Contest server is REACHABLE.
 ) else (
-    echo   [NOTE] Contest server (%SERVER_IP%) not responding.
-    echo          (Ignore if server is currently offline or uses a different IP).
+    echo   [NOTE] Contest server %SERVER_IP% not responding.
+    echo          Ignore if server is currently offline or uses a different IP.
 )
 
 :: Test Internet Isolation (External ping should FAIL)
-echo Testing Internet Isolation (pinging 8.8.8.8)...
+echo Testing Internet Isolation - pinging 8.8.8.8...
 ping -n 1 -w 1500 8.8.8.8 >nul 2>&1
 if %errorLevel% neq 0 (
-    echo   [PASS] External Internet is BLOCKED. (Expected for offline contest)
+    echo   [PASS] External Internet is BLOCKED. Expected for offline contest.
 ) else (
     echo   [WARNING] External Internet is STILL ACCESSIBLE!
     echo             Please ensure firewall rules are active or unplug the WAN uplink.
@@ -150,7 +150,6 @@ echo ============================================================
 if %FAIL_COUNT% equ 0 (
     echo  VERIFICATION SUMMARY: [ALL CHECKS PASSED] Workstation is READY.
 ) else (
-    echo  VERIFICATION SUMMARY: [%FAIL_COUNT% ISSUE(S) DETECTED] Review errors above.
+    echo  VERIFICATION SUMMARY: [%FAIL_COUNT% ISSUE DETECTED] Review errors above.
 )
 echo ============================================================
-
