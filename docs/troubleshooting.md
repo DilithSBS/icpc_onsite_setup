@@ -4,28 +4,62 @@ This guide addresses common technical issues encountered when setting up 60 Wind
 
 ---
 
-## 1. Issue: "Compiler not recognized" in Contestant Account
+## 1. Issue: "Python was not found; run without arguments to install from the Microsoft Store"
 
 ### Symptom:
-`gcc`, `g++`, `javac`, or `python` runs fine when logged in as Administrator, but fails with `"command not recognized"` when logged in as `contestant`.
+When running `python`, Windows displays:
+```text
+Python was not found; run without arguments to install from the Microsoft Store, or disable this shortcut from Settings > Apps > Advanced app settings > App execution aliases.
+```
 
 ### Root Cause:
-The environment variable `PATH` was added under **User Variables for Administrator**, not **System Variables**.
+Windows 10/11 includes a dummy "App Execution Alias" stub located at `%LOCALAPPDATA%\Microsoft\WindowsApps\python.exe`. When real Python is not installed, Windows intercepts the `python` command and tries to open the Microsoft Store.
 
 ### Fix:
-Open PowerShell as Administrator and run the following command to append the toolchain to the machine-wide `PATH`:
-
-```powershell
-# Example for MinGW and Python:
-$oldPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-$newPath = "$oldPath;C:\MinGW\bin;C:\Python312;C:\Python312\Scripts"
-[Environment]::SetEnvironmentVariable("Path", $newPath, "Machine")
-```
-*Note: Restart the PC or sign out and sign back in for the changes to take effect.*
+1. `00_install_prerequisites.ps1` automatically detects real Python vs the Microsoft Store stub and installs Python 3.12 machine-wide via `winget`.
+2. To install manually as Administrator:
+   ```cmd
+   winget install --id Python.Python.3.12 --scope machine --override "/quiet InstallAllUsers=1 PrependPath=1"
+   ```
+3. Ensure `C:\Program Files\Python312` appears in the **System PATH** ahead of `%USERPROFILE%\AppData\Local\Microsoft\WindowsApps`.
 
 ---
 
-## 2. Issue: Windows Defender Quarantining Student Executables
+## 2. Issue: Cannot Type Input into Code Runner Terminal
+
+### Symptom:
+When running a C++ or Python program using the Code Runner Play ▶ button, the program hangs waiting for input, but the terminal does not allow typing.
+
+### Root Cause:
+By default, Code Runner executes code in the VS Code **Output** tab, which is read-only and does not accept stdin (`cin`, `scanf`, `input()`).
+
+### Fix:
+Ensure `configs/vscode/settings.json` has:
+```json
+"code-runner.runInTerminal": true
+```
+This forces Code Runner to use the interactive integrated terminal, allowing contestants to type keyboard input or paste test cases.
+
+---
+
+## 3. Issue: External Ping (8.8.8.8) Succeeds Despite Firewall Lockdown
+
+### Symptom:
+`04_verify_env.bat` warns that external internet is accessible because `ping 8.8.8.8` received a reply.
+
+### Root Cause:
+Windows 11 has a pre-existing built-in rule: `File and Printer Sharing (Echo Request - ICMPv4-Out)` set to **Allow**. In Windows Firewall, an explicit `Allow` rule takes precedence over `DefaultOutboundAction Block`.
+
+### Fix:
+`02_lockdown_network.ps1` automatically disables all built-in outbound Echo Request rules:
+```powershell
+Get-NetFirewallRule | Where-Object { $_.Direction -eq "Outbound" -and $_.DisplayName -like "*Echo Request*" } | Disable-NetFirewallRule
+```
+Once disabled, only pings destined for the DOMjudge server (`DOMSERVER_IP`) are permitted.
+
+---
+
+## 4. Issue: Windows Defender Quarantining Student Executables
 
 ### Symptom:
 A contestant compiles their C/C++ solution (`g++ solution.cpp -o solution.exe`), but running `solution.exe` gives an "Access Denied" error or Windows Defender notifies that a threat was blocked.
@@ -35,64 +69,43 @@ Windows Defender heuristics frequently flag freshly compiled small binaries with
 
 ### Fix:
 Add an exclusion path in Windows Defender for the contest workspace folder:
-
 ```powershell
 Add-MpPreference -ExclusionPath "C:\Users\contestant\Desktop\ICPC_Workspace"
 ```
-*(Run this as Administrator).*
+*(Run this in an elevated Administrator PowerShell prompt).*
 
 ---
 
-## 3. Issue: Cannot Access Contest Server (DOMjudge / PC^2)
+## 5. Issue: "Compiler not recognized" in Contestant Account
 
 ### Symptom:
-Browser shows `ERR_CONNECTION_REFUSED` or `ERR_CONNECTION_TIMED_OUT` when loading `http://192.168.1.100`.
+`gcc`, `g++`, `javac`, or `python` works in Administrator, but fails with `"command not recognized"` in the contestant account.
 
-### Diagnostic Steps:
-1. **Verify Local IP Address:**
-   Run `ipconfig` in Command Prompt. Ensure the workstation's IP is in the same subnet (e.g. `192.168.1.xxx`).
-2. **Ping the Server:**
-   Run `ping 192.168.1.100`.
-   - If ping responds: Web server service (e.g. Nginx/Apache on the judge server) is stopped or bound only to `127.0.0.1`. Check judge server configs.
-   - If ping times out: Physical cable issue or workstation firewall rule was configured with the wrong subnet.
-3. **Check Firewall Rules:**
-   Run `Get-NetFirewallRule -DisplayName "ICPC-*"` in PowerShell to confirm the `ICPC-Allow-Subnet` rule is present and enabled.
-
----
-
-## 4. Issue: VS Code Extensions Missing for Contestant
-
-### Symptom:
-C/C++ or Python extensions installed under the Administrator account do not show up when `contestant` opens VS Code.
+### Root Cause:
+The `PATH` environment variable was added under **User Variables for Administrator**, not **System Variables**.
 
 ### Fix:
-By default, VS Code installs extensions to `%USERPROFILE%\.vscode\extensions`. To make extensions available to all users on the PC:
-
-1. Copy the extensions folder to a shared directory:
-   ```cmd
-   robocopy "%USERPROFILE%\.vscode\extensions" "C:\ProgramData\VSCodeExtensions" /E
-   ```
-2. Modify the contestant's VS Code shortcut to include the shared extensions directory:
-   ```cmd
-   code --extensions-dir "C:\ProgramData\VSCodeExtensions" "C:\Users\contestant\Desktop\ICPC_Workspace"
-   ```
+Append the toolchains to the machine-wide `PATH`:
+```powershell
+$oldPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+$newPath = "$oldPath;C:\MinGW\bin;C:\Program Files\Python312;C:\Program Files\Java\jdk-21\bin"
+[Environment]::SetEnvironmentVariable("Path", $newPath, "Machine")
+```
+Sign out and sign back in for the changes to apply to all user profiles.
 
 ---
 
-## 5. Issue: Contestant Accidental Internet Re-connection (WiFi)
+## 6. Issue: Contestant Accidental Internet Re-connection (WiFi)
 
 ### Symptom:
-Lab machines with built-in WiFi cards automatically connect to university campus Wi-Fi, bypassing the physical Ethernet air-gap.
+Workstations with built-in WiFi cards automatically connect to university campus Wi-Fi, bypassing the physical Ethernet air-gap.
 
 ### Fix:
 Disable the wireless network adapter on all contest machines:
-
 ```powershell
-# Disable all wireless network interfaces
 Get-NetAdapter | Where-Object { $_.InterfaceDescription -match "Wireless|Wi-Fi|802.11" } | Disable-NetAdapter -Confirm:$false
 ```
-To re-enable after contest:
+To re-enable after the contest:
 ```powershell
 Get-NetAdapter | Where-Object { $_.InterfaceDescription -match "Wireless|Wi-Fi|802.11" } | Enable-NetAdapter -Confirm:$false
 ```
-

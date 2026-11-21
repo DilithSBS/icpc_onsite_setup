@@ -1,6 +1,6 @@
 # Network Topology & Air-Gap Guidelines
 
-This document outlines the recommended network topology for running an internet-free ICPC contest across 60 client workstations and a local contest server.
+This document outlines the network topology and multi-layered isolation plan for running an internet-free ICPC contest across 60 client workstations and a local contest server.
 
 ---
 
@@ -45,22 +45,27 @@ This document outlines the recommended network topology for running an internet-
 * Without a physical uplink, packets cannot leave the room under any circumstances.
 * All 60 client PCs can still communicate with the local server at gigabit speeds over the local switch.
 
-### Layer 2: Host-based Windows Firewall (Defense-in-Depth)
-* Even if an accidental uplink cable or rogue WiFi network is connected:
-  * `02_lockdown_network.ps1` sets the default Windows outbound action to **BLOCK**.
-  * Only packets destined for the `192.168.1.0/24` subnet are permitted.
-  * Packets to `8.8.8.8`, external domain names, or other subnets are dropped at the kernel driver level.
+### Layer 2: Host-based Windows Firewall & System Lockdown (Defense-in-Depth)
+Even if an accidental uplink cable or rogue WiFi network is connected:
+1. **Strict DOMserver-Only Rule:**
+   * `02_lockdown_network.ps1` sets the default Windows outbound action to **BLOCK**.
+   * Only packets destined for the single **`DOMSERVER_IP`** (`192.168.1.100`) are permitted.
+2. **Anti-Cheating Client-to-Client Blocking:**
+   * Workstation PCs cannot communicate, ping, or share files with other contestant PCs on the local subnet. (Client-to-client isolation).
+3. **No ICMP Ping Leaks:**
+   * The script automatically disables built-in Windows rules (such as `File and Printer Sharing (Echo Request - ICMPv4-Out)`) that would otherwise allow external pings (e.g. `8.8.8.8`) to bypass the default block.
+4. **Windows Update Freezing:**
+   * Windows Update services (`wuauserv`, `DoSvc`, `UsoSvc`, `WaaSMedicSvc`) and telemetry policies are disabled to prevent background network polling and bandwidth consumption.
 
 ---
 
 ## 4. DHCP and Name Resolution
 
 1. **Option A: Router/Server DHCP (Recommended)**
-   * Run a simple DHCP server on the contest server or a dedicated unmanaged router with WAN unplugged.
+   * Run a simple DHCP server on the contest server or an unmanaged router with WAN unplugged.
    * Configure DHCP pool: `192.168.1.101` - `192.168.1.160`.
-   * **Do not configure a default gateway** in the DHCP options. This prevents Windows from even attempting to look for an internet route.
-   * Set DNS to `192.168.1.100` (pointing to the DOMjudge server) or leave blank and access the server via its direct IP: `http://192.168.1.100`.
+   * **Do not configure a default gateway** in DHCP options. This prevents Windows from even attempting to look for an internet route.
+   * Access the server directly via IP: `http://192.168.1.100`.
 
 2. **Option B: Static IPs**
    * If the lab already has hardcoded static IP addresses, simply leave the IP and Subnet mask intact and set the **Default Gateway** and **DNS Server** fields completely blank.
-
