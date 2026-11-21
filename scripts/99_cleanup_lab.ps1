@@ -67,6 +67,18 @@ if ($targetUsers) {
     Write-Host "[NOTE] No contest users found to remove." -ForegroundColor Gray
 }
 
+# 5. Restore Windows Update Services & Policies
+Write-Host "[INFO] Restoring Windows Update services..." -ForegroundColor Yellow
+Set-Service -Name "wuauserv" -StartupType Manual -ErrorAction SilentlyContinue
+Set-Service -Name "DoSvc" -StartupType Automatic -ErrorAction SilentlyContinue
+Set-Service -Name "UsoSvc" -StartupType Manual -ErrorAction SilentlyContinue
+$wuPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+if (Test-Path $wuPolicyPath) {
+    Remove-ItemProperty -Path $wuPolicyPath -Name "NoAutoUpdate" -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $wuPolicyPath -Name "AUOptions" -ErrorAction SilentlyContinue
+}
+Write-Host "[OK] Windows Update restored to default." -ForegroundColor Green
+
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host " Workstation restored to normal lab state." -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green

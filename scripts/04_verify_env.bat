@@ -119,7 +119,20 @@ if %errorLevel% equ 0 (
 )
 
 echo.
-echo [3] Checking Network Security ^& Isolation:
+echo [3] Running 30-Test-Case Comprehensive Suite (C, C++, Java, Python):
+echo ------------------------------------------------------------
+where python >nul 2>&1
+if %errorLevel% equ 0 (
+    python "%SCRIPT_DIR%run_30_tests.py"
+    if %errorLevel% neq 0 (
+        set /a FAIL_COUNT+=1
+    )
+) else (
+    echo   [NOTE] Python interpreter not detected to run the 30-test suite.
+)
+
+echo.
+echo [4] Checking Network Security ^& Isolation:
 echo ------------------------------------------------------------
 
 :: Test LAN/Server Reachability

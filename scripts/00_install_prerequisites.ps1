@@ -210,6 +210,28 @@ if ($null -ne $pythonCmd) {
     }
 }
 
+# -------------------------------------------------------------
+# 5. Visual Studio Code Extensions (Code Runner)
+# -------------------------------------------------------------
+Write-Host "`n[5/5] Checking VS Code Extensions (Code Runner)..." -ForegroundColor Yellow
+$codeBin = Get-Command code.cmd, code.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($codeBin) {
+    $installedExts = & $codeBin.Source --list-extensions 2>$null
+    if ($installedExts -contains "formulahendry.code-runner") {
+        Write-Host "  [OK] Code Runner extension is already installed." -ForegroundColor Green
+    } else {
+        if ($hasInternet) {
+            Write-Host "  [DOWNLOADING] Installing Code Runner (formulahendry.code-runner)..." -ForegroundColor Cyan
+            & $codeBin.Source --install-extension formulahendry.code-runner --force 2>$null
+            Write-Host "  [OK] Code Runner extension installed successfully." -ForegroundColor Green
+        } else {
+            Write-Host "  [NOTE] Offline: Please pre-install formulahendry.code-runner before network lockdown." -ForegroundColor Yellow
+        }
+    }
+} else {
+    Write-Host "  [NOTE] VS Code CLI not yet detected; extension will be synced during user configuration." -ForegroundColor Gray
+}
+
 Update-SessionPath
 Write-Host "`n==========================================" -ForegroundColor Green
 Write-Host " Prerequisites check completed." -ForegroundColor Green

@@ -62,6 +62,23 @@ if (Test-Path $contestantHome) {
     Write-Host "[OK] Contestant profile updated." -ForegroundColor Green
 }
 
+# Copy VS Code Extensions (including Code Runner) to Default and Contestant profiles
+$adminExtensionsDir = "$env:USERPROFILE\.vscode\extensions"
+$defaultExtensionsDir = "C:\Users\Default\.vscode\extensions"
+$contestantExtensionsDir = "C:\Users\$Username\.vscode\extensions"
+
+if (Test-Path $adminExtensionsDir) {
+    Write-Host "[INFO] Syncing installed extensions (Code Runner) to contestant profile..." -ForegroundColor Yellow
+    if (-not (Test-Path $defaultExtensionsDir)) { New-Item -ItemType Directory -Path $defaultExtensionsDir -Force | Out-Null }
+    robocopy $adminExtensionsDir $defaultExtensionsDir /E /NFL /NDL /NJH /NJS /nc /ns /np | Out-Null
+
+    if (Test-Path $contestantHome) {
+        if (-not (Test-Path $contestantExtensionsDir)) { New-Item -ItemType Directory -Path $contestantExtensionsDir -Force | Out-Null }
+        robocopy $adminExtensionsDir $contestantExtensionsDir /E /NFL /NDL /NJH /NJS /nc /ns /np | Out-Null
+    }
+    Write-Host "[OK] Extensions synced to '$Username'." -ForegroundColor Green
+}
+
 # 2. Create Desktop Workspace
 $contestantDesktop = "C:\Users\$Username\Desktop"
 if (Test-Path $contestantDesktop) {

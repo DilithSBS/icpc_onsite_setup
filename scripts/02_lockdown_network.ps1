@@ -129,6 +129,21 @@ if (-not [string]::IsNullOrWhiteSpace($PrintServerIP)) {
                         -Description "ICPC: Print server communication" | Out-Null
 }
 
+# 6. Stop and Disable Windows Updates during the contest
+Write-Host "[INFO] Disabling Windows Update services & policies..." -ForegroundColor Yellow
+$wuServices = @("wuauserv", "DoSvc", "UsoSvc", "WaaSMedicSvc")
+foreach ($svc in $wuServices) {
+    Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
+    Set-Service -Name $svc -StartupType Disabled -ErrorAction SilentlyContinue
+}
+$wuPolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU"
+if (-not (Test-Path $wuPolicyPath)) {
+    New-Item -Path $wuPolicyPath -Force | Out-Null
+}
+Set-ItemProperty -Path $wuPolicyPath -Name "NoAutoUpdate" -Value 1 -Type DWord
+Set-ItemProperty -Path $wuPolicyPath -Name "AUOptions" -Value 2 -Type DWord
+Write-Host "[OK] Windows Update disabled." -ForegroundColor Green
+
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host " Network lockdown successfully applied!" -ForegroundColor Green
 Write-Host " - All Internet, WAN, and peer PC communication is BLOCKED." -ForegroundColor Green
