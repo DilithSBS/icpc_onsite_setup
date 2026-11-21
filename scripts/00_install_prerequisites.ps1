@@ -167,14 +167,34 @@ if ($null -ne $javacCmd) {
 # -------------------------------------------------------------
 Write-Host "`n[4/4] Checking Python Interpreter..." -ForegroundColor Yellow
 Update-SessionPath
-$pythonCmd = Get-Command python.exe -ErrorAction SilentlyContinue
+
+# Check common Python installation paths
+$commonPythonPaths = @(
+    "C:\Program Files\Python312",
+    "C:\Program Files\Python313",
+    "C:\Program Files\Python311",
+    "C:\Python312",
+    "C:\Python313",
+    "C:\Python314"
+)
+foreach ($p in $commonPythonPaths) {
+    if (Test-Path (Join-Path $p "python.exe")) {
+        Add-ToMachinePath $p
+        Add-ToMachinePath (Join-Path $p "Scripts")
+        break
+    }
+}
+Update-SessionPath
+
+# Filter out WindowsApps Microsoft Store stub
+$pythonCmd = (Get-Command python.exe -All -ErrorAction SilentlyContinue | Where-Object { $_.Source -notmatch "WindowsApps" } | Select-Object -First 1)
 
 if ($null -ne $pythonCmd) {
     $pyVer = (python.exe --version 2>$null)
     Write-Host "  [OK] Python is already installed ($pyVer)" -ForegroundColor Green
     Add-ToMachinePath (Split-Path -Parent $pythonCmd.Source)
 } else {
-    Write-Host "  [MISSING] Python not detected." -ForegroundColor Yellow
+    Write-Host "  [MISSING] Real Python not detected (or only Microsoft Store stub found)." -ForegroundColor Yellow
     if ($hasInternet -and $hasWinget) {
         Write-Host "  [DOWNLOADING] Installing Python 3.12 (Machine-wide)..." -ForegroundColor Cyan
         & winget.exe install --id Python.Python.3.12 --scope machine --silent --accept-package-agreements --accept-source-agreements --override "/quiet InstallAllUsers=1 PrependPath=1"

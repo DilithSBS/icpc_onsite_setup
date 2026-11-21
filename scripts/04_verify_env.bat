@@ -108,11 +108,12 @@ if %errorLevel% equ 0 (
 :: Test Python
 where python >nul 2>&1
 if %errorLevel% equ 0 (
-    python "%TEST_DIR%\test.py"
+    python "%TEST_DIR%\test.py" >nul 2>&1
     if %errorLevel% equ 0 (
+        python "%TEST_DIR%\test.py"
         echo   [PASS] Python execution succeeded.
     ) else (
-        echo   [FAIL] Python execution failed!
+        echo   [FAIL] Python execution failed (check if real Python is installed, not WindowsApps stub)!
         set /a FAIL_COUNT+=1
     )
 )

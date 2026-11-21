@@ -61,6 +61,10 @@ Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True
 Write-Host "[INFO] Setting Outbound Default Policy to BLOCK..." -ForegroundColor Yellow
 Set-NetFirewallProfile -Profile Domain,Private,Public -DefaultOutboundAction Block -DefaultInboundAction Block
 
+# Disable built-in outbound Echo Request rules to prevent external ping leaks
+Write-Host "[INFO] Disabling built-in outbound ICMP rules..." -ForegroundColor Yellow
+Get-NetFirewallRule | Where-Object { $_.Direction -eq "Outbound" -and $_.DisplayName -like "*Echo Request*" } | Disable-NetFirewallRule -ErrorAction SilentlyContinue
+
 # 5. Add Whitelist Rules
 
 # Allow DHCP so workstation maintains LAN IP from local router/switch

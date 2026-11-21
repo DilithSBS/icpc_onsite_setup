@@ -155,10 +155,12 @@ int main() {
         $shortcut.Description = "Open ICPC Workspace in VS Code"
         $shortcut.Save()
         Write-Host "[OK] Desktop shortcut created." -ForegroundColor Green
-    } catch {
+    }
+    catch {
         Write-Host "[NOTE] Desktop shortcut skipped (user profile may not be fully initialized)." -ForegroundColor Gray
     }
-} else {
+}
+else {
     Write-Host "[NOTE] '$Username' desktop will be configured on first login." -ForegroundColor Gray
 }
 
