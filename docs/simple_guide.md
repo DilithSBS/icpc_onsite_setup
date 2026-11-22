@@ -75,3 +75,4 @@ The script will automatically:
 - Reset the firewall and restore normal internet access.
 - Re-enable any Wi-Fi adapters.
 - Re-enable Windows Updates.
+

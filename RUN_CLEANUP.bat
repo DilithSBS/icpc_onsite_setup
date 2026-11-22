@@ -17,14 +17,16 @@ cd /d "%~dp0"
 
 cls
 echo ============================================================
-echo         ICPC LAB TEARDOWN & RECOVERY SCRIPT
+echo         ICPC LAB TEARDOWN AND RECOVERY SCRIPT
 echo ============================================================
 echo.
 echo WARNING: This script will:
-echo   1. Remove the 'contestant' user account and files
+echo   1. Remove the contestant user account and files
 echo   2. Reset Windows Firewall to default operating system state
 echo   3. Restore normal Internet and LAN access
-echo   4. Disable automatic contestant login
+echo   4. Re-enable Wi-Fi network adapters
+echo   5. Re-enable Windows Update services
+echo   6. Disable automatic contestant login
 echo.
 echo ============================================================
 echo.
@@ -47,4 +49,3 @@ echo ============================================================
 echo The PC has been restored to default university lab state.
 echo.
 pause
-
