@@ -16,6 +16,7 @@ A production-ready automation toolkit and operational runbook for configuring 60
 * **VS Code & Code Runner:** Pre-configures VS Code in offline mode, installs the `formulahendry.code-runner` extension, and maps interactive terminal execution (`runInTerminal: true`) for instant code running.
 * **Team & Account Provisioning:** Automatically provisions individual team accounts (`ICPCLK26_G...`) or generic `contestant` accounts with locked Standard User privileges.
 * **Strict Network Isolation:** Locks Windows Firewall outbound policy to **BLOCK**—completely cutting off internet, blocking peer-to-peer communication between contestants, and permitting traffic **strictly** to the DOMjudge server.
+* **Auto Wi-Fi Disabling:** Scans for and automatically disables all wireless (Wi-Fi/WLAN) adapters on the PC, forcing all network traffic through the isolated wired Ethernet switch.
 * **Windows Update Freezing:** Stops and disables Windows Update background services and telemetry policies to ensure zero popups or unexpected reboots during contest hours.
 * **120 Comprehensive Tests (30 per Language):** Runs 30 automated algorithmic test cases for C, C++, Java, and Python covering 64-bit overflow, negative numbers, stress tests ($N=1000$), strings, and edge cases.
 * **Clean Post-Contest Teardown:** One-click rollback script (`RUN_CLEANUP.bat`) restores the computer lab to factory university settings and re-enables Windows Updates.
@@ -43,6 +44,7 @@ A production-ready automation toolkit and operational runbook for configuring 60
 ├── docs/
 │   ├── checklist.md          # Complete organizer timeline checklist (T-7 to T-0)
 │   ├── network-topology.md   # Subnets, IP plans, and physical air-gap diagrams
+│   ├── simple_guide.md       # 1-page quickstart setup guide for volunteers
 │   └── troubleshooting.md    # Solutions for compiler PATHs, WindowsApps stubs, etc.
 └── scripts/
     ├── 00_install_prerequisites.ps1 # Auto-installs missing compilers, VS Code & Code Runner
@@ -129,6 +131,7 @@ Once the competition concludes:
 
 ## 📖 Operational Documentation
 
+* ⚡ [Simple 3-Step Volunteer Guide](docs/simple_guide.md) – Quick, 1-page instructions for setting up and testing each PC.
 * 📝 [Organizer Timeline Checklist](docs/checklist.md) – Step-by-step checklist from T-7 days to contest morning.
 * 🌐 [Network Topology & Isolation Plan](docs/network-topology.md) – Physical air-gap diagram, client-to-client blocking, and IP addressing.
 * 🛠️ [Troubleshooting Guide](docs/troubleshooting.md) – Solutions for WindowsApps Python stubs, firewall ping precedence, and Defender false-positives.

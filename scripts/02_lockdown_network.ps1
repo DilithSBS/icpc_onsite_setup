@@ -49,6 +49,32 @@ if ($fwService.Status -ne "Running") {
     Start-Service -Name "mpssvc"
 }
 
+# 1.1 Check and Disable Wireless (Wi-Fi) Network Adapters
+Write-Host "[INFO] Scanning for Wireless / Wi-Fi network adapters..." -ForegroundColor Yellow
+$wifiAdapters = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object {
+    $_.PhysicalMediaType -match "Wireless|Native 802.11" -or
+    $_.InterfaceDescription -match "Wireless|Wi-Fi|802.11|WLAN" -or
+    $_.Name -match "Wi-Fi|Wireless|WLAN"
+}
+
+if ($wifiAdapters) {
+    foreach ($adapter in $wifiAdapters) {
+        Write-Host "  [DETECTED] Wireless Adapter: $($adapter.Name) ($($adapter.InterfaceDescription))" -ForegroundColor Red
+        if ($adapter.Status -ne "Disabled") {
+            try {
+                Disable-NetAdapter -Name $adapter.Name -Confirm:$false -ErrorAction Stop
+                Write-Host "  [DISABLED] $($adapter.Name) has been disabled to enforce wired LAN only." -ForegroundColor Green
+            } catch {
+                Write-Host "  [WARNING] Could not disable $($adapter.Name): $_" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "  [INFO] $($adapter.Name) is already disabled." -ForegroundColor Gray
+        }
+    }
+} else {
+    Write-Host "  [OK] No Wi-Fi adapters detected (Wired Ethernet only)." -ForegroundColor Green
+}
+
 # 2. Clean up any existing ICPC rules
 Write-Host "[INFO] Cleaning up older ICPC firewall rules..." -ForegroundColor Yellow
 Remove-NetFirewallRule -DisplayName "ICPC-*" -ErrorAction SilentlyContinue

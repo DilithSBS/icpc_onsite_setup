@@ -79,6 +79,26 @@ if (Test-Path $wuPolicyPath) {
 }
 Write-Host "[OK] Windows Update restored to default." -ForegroundColor Green
 
+# 6. Re-enable Wireless (Wi-Fi) Network Adapters
+Write-Host "[INFO] Re-enabling Wireless / Wi-Fi network adapters..." -ForegroundColor Yellow
+$wifiAdapters = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object {
+    $_.PhysicalMediaType -match "Wireless|Native 802.11" -or
+    $_.InterfaceDescription -match "Wireless|Wi-Fi|802.11|WLAN" -or
+    $_.Name -match "Wi-Fi|Wireless|WLAN"
+}
+if ($wifiAdapters) {
+    foreach ($adapter in $wifiAdapters) {
+        try {
+            Enable-NetAdapter -Name $adapter.Name -Confirm:$false -ErrorAction Stop
+            Write-Host "[OK] Re-enabled Wi-Fi adapter: $($adapter.Name)" -ForegroundColor Green
+        } catch {
+            Write-Host "[NOTE] Could not re-enable $($adapter.Name): $_" -ForegroundColor Gray
+        }
+    }
+} else {
+    Write-Host "[NOTE] No Wi-Fi adapters detected to re-enable." -ForegroundColor Gray
+}
+
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host " Workstation restored to normal lab state." -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green
