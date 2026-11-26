@@ -8,7 +8,7 @@ This guide is designed for organizers and student volunteers setting up the 60 c
 
 | Action | Script to Run | Time Needed |
 | :--- | :--- | :--- |
-| **Setup PC for Contest** | Double-click `RUN_SETUP.bat` | ~20 seconds per PC |
+| **Setup PC for Contest** | Double-click `RUN_SETUP.bat` | ~3-5 minutes per PC (first PC longer: downloads) |
 | **Restore PC After Contest** | Double-click `RUN_CLEANUP.bat` | ~10 seconds per PC |
 
 ---
@@ -33,14 +33,18 @@ This guide is designed for organizers and student volunteers setting up the 60 c
 
 ### That's it!
 The script will automatically:
-- [x] Check/install missing compilers and Code Runner extension.
-- [x] Create the team's account with their password.
+- [x] Install missing compilers for ALL accounts and prepare the VS Code language extensions.
+- [x] Create the team's account (and its profile) with their password.
 - [x] Disable Wi-Fi and block internet (locking network strictly to DOMjudge).
 - [x] Freeze Windows Updates.
-- [x] Configure VS Code and desktop workspace.
-- [x] Run 120 automated test cases (30 per language).
+- [x] Install VS Code settings, extensions (Code Runner, C/C++, Python, Java) and the desktop workspace into the team's account.
+- [x] Run 120 automated test cases and an internet-leak test - as Administrator AND inside the team's account.
 
-When it prints **`SETUP WORKFLOW FINISHED`**, press any key to close the window, remove the USB drive, and move to the next PC.
+When it prints **`SETUP FINISHED - ALL STEPS OK`**, press any key, remove the USB drive, and move to the next PC.
+If it prints **`SETUP FINISHED WITH PROBLEMS IN: ...`**, scroll up to the red lines (see `docs/troubleshooting.md`) and run it again.
+If it says **a restart is pending**, restart the PC and run `RUN_SETUP.bat` again.
+
+> The **first** PC must have internet: it downloads the tools and saves the VS Code extensions to `installers\vscode-extensions` on the USB stick. Later PCs reuse that copy.
 
 ---
 

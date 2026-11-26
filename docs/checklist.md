@@ -37,9 +37,10 @@ This checklist is designed for the technical committee organizing ICPC programmi
   - Insert USB drive and run `RUN_SETUP.bat` (Run as Administrator).
   - Enter the assigned PC number (`1` to `60`) when prompted.
   - Verify output across all 5 automated phases:
-    - [x] Step 1: Toolchains verified / auto-installed via `winget` (Code Runner extension installed).
+    - [x] Step 1: Toolchains installed machine-wide via `winget`; VS Code extensions cached.
     - [x] Step 2: Official team user account created with Standard User restrictions.
-    - [x] Step 3: Windows Updates disabled and firewall locked down to `%DOMSERVER_IP%`.
+    - [x] Step 3/4: Firewall locked down to `%DOMSERVER_IP%`; Windows Update frozen.
+    - [x] Step 7: Verification passed **inside the contestant account**.
     - [x] Step 4: VS Code settings injected, Code Runner synced, desktop workspace created.
     - [x] Step 5: Smoke test passed & **30/30 test cases passed for C, C++, Java, and Python** (120/120 total).
     - [x] External internet ping (8.8.8.8) is BLOCKED.

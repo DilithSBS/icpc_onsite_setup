@@ -51,11 +51,7 @@ This forces Code Runner to use the interactive integrated terminal, allowing con
 Windows 11 has a pre-existing built-in rule: `File and Printer Sharing (Echo Request - ICMPv4-Out)` set to **Allow**. In Windows Firewall, an explicit `Allow` rule takes precedence over `DefaultOutboundAction Block`.
 
 ### Fix:
-`02_lockdown_network.ps1` automatically disables all built-in outbound Echo Request rules:
-```powershell
-Get-NetFirewallRule | Where-Object { $_.Direction -eq "Outbound" -and $_.DisplayName -like "*Echo Request*" } | Disable-NetFirewallRule
-```
-Once disabled, only pings destined for the DOMjudge server (`DOMSERVER_IP`) are permitted.
+`02_lockdown_network.ps1` now adds explicit `ICPC-Block-*` rules (TCP, UDP, ICMPv4, ICMPv6). Block rules take precedence over every allow rule, so built-in rules like this one can no longer leak. The verification also tests real TCP/HTTPS/DNS/proxy connections (`net_probe.ps1`), not just ping.
 
 ---
 
@@ -109,3 +105,42 @@ To re-enable after the contest:
 ```powershell
 Get-NetAdapter | Where-Object { $_.InterfaceDescription -match "Wireless|Wi-Fi|802.11" } | Enable-NetAdapter -Confirm:$false
 ```
+
+---
+
+## 7. Issue: Compilers / Python work as Administrator but not in the contestant account
+
+### Root Cause:
+The tool was installed **for the Administrator only** (winget's default per-user WinLibs install, or a "Just for me" Python). It lives under `C:\Users\<admin>\...`, which other accounts cannot read.
+
+### Fix:
+`00_install_prerequisites.ps1` ignores such copies, installs machine-wide (`--scope machine`), copies a per-user WinLibs to `C:\mingw64` if needed, and removes `C:\Users\...` entries from the System PATH. Step 7 of `RUN_SETUP.bat` confirms it from inside the contestant account.
+
+---
+
+## 8. Issue: VS Code extensions missing in the contestant account
+
+### Root Cause:
+VS Code records installed extensions in `.vscode\extensions\extensions.json` with absolute paths. Copying the Administrator's folder leaves paths the contestant cannot read, and the contestant profile did not exist yet at setup time.
+
+### Fix:
+Setup now creates the profile immediately, copies the extensions from `C:\ProgramData\ICPC\vscode-extensions` and rewrites `extensions.json` for the contestant. If step 1 reports **MISSING** extensions, run setup once on a PC with internet: the cache is saved to `installers\vscode-extensions` on the USB stick for all other PCs. Edit `configs/vscode/extensions.txt` to change the list.
+
+---
+
+## 9. Issue: Step 3 reports "Group Policy ignores local firewall rules"
+
+### Root Cause:
+The PC is domain-joined and a GPO sets "Apply local firewall rules = No" (or turns the firewall off). Local rules then have no effect.
+
+### Fix:
+Ask campus IT to move the lab PCs to an OU without that GPO for the contest, or physically disconnect the lab switch from the campus uplink.
+
+---
+
+## 10. Issue: Windows still wants to install updates / restart
+
+### Fix:
+* Step 4 warns when an update is **already downloaded and waiting for a restart**. Restart the PC, let it finish, then run `RUN_SETUP.bat` again; do this the day before the contest.
+* `WaaSMedicSvc` is protected by Windows and may stay enabled; that is expected. Policies + firewall leave it nothing to download.
+* `RUN_CLEANUP.bat` restores all update settings; restart afterwards.

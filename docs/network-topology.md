@@ -48,14 +48,14 @@ This document outlines the network topology and multi-layered isolation plan for
 ### Layer 2: Host-based Windows Firewall & System Lockdown (Defense-in-Depth)
 Even if an accidental uplink cable or rogue WiFi network is connected:
 1. **Strict DOMserver-Only Rule:**
-   * `02_lockdown_network.ps1` sets the default Windows outbound action to **BLOCK**.
+   * `02_lockdown_network.ps1` sets the default Windows outbound action to **BLOCK** and adds explicit `ICPC-Block-*` rules (TCP, UDP incl. DNS, ICMP) for every address except the DOMjudge server and loopback. Block rules override any other allow rule (built-in, app-created or Group Policy), so the lockdown holds for every account. DHCP (UDP 67/68) stays open to keep the IP lease.
    * Only packets destined for the single **`DOMSERVER_IP`** (`192.168.1.100`) are permitted.
 2. **Anti-Cheating Client-to-Client Blocking:**
    * Workstation PCs cannot communicate, ping, or share files with other contestant PCs on the local subnet. (Client-to-client isolation).
 3. **No ICMP Ping Leaks:**
    * The script automatically disables built-in Windows rules (such as `File and Printer Sharing (Echo Request - ICMPv4-Out)`) that would otherwise allow external pings (e.g. `8.8.8.8`) to bypass the default block.
 4. **Windows Update Freezing:**
-   * Windows Update services (`wuauserv`, `DoSvc`, `UsoSvc`, `WaaSMedicSvc`) and telemetry policies are disabled to prevent background network polling and bandwidth consumption.
+   * `02b_block_updates.ps1`: update policies (no auto-update, no auto-restart with a logged-on user, WU pointed at a dead local server, no "Check for updates" for users), updates paused, `wuauserv`/`UsoSvc`/`DoSvc` and update scheduled tasks disabled as SYSTEM. `WaaSMedicSvc` is protected by Windows and may stay enabled; with the policies and firewall it has nothing to download.
 
 ---
 
