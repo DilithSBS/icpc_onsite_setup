@@ -5,11 +5,13 @@ setlocal EnableDelayedExpansion
 :: ICPC Lab Workstation Teardown / Cleanup Launcher
 :: -------------------------------------------------------------
 
+set "PS=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+
 :: Check for Administrative Privileges and Auto-Elevate
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo [INFO] Administrative permissions required. Requesting elevation...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    "%PS%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
 )
 
@@ -40,7 +42,7 @@ if /i not "%CONFIRM%"=="Y" (
 
 echo.
 echo Running cleanup script...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\99_cleanup_lab.ps1"
+"%PS%" -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\99_cleanup_lab.ps1"
 
 echo.
 echo ============================================================

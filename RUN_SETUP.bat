@@ -5,11 +5,13 @@ setlocal EnableDelayedExpansion
 :: ICPC Lab Workstation Setup Launcher (Phase 1 - Accounts & Tools)
 :: -------------------------------------------------------------
 
+set "PS=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+
 :: 1. Check for Administrative Privileges and Auto-Elevate
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo [INFO] Administrative permissions required. Requesting elevation...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    "%PS%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
 )
 
@@ -88,26 +90,24 @@ if "%PC_NUM%"=="" (
 
 echo.
 echo [1/4] Checking and installing missing toolchains...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\00_install_prerequisites.ps1"
+"%PS%" -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\00_install_prerequisites.ps1"
 if %errorLevel% neq 0 (
     echo [WARNING] Prerequisites check encountered an issue.
 )
 
-:: Refresh PATH from Registry in current session
-for /f "tokens=2*" %%A in ('reg query "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%B"
-for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USER_PATH=%%B"
-set "PATH=%SYS_PATH%;%USER_PATH%"
+:: Refresh expanded PATH from Machine & User environment in current session
+for /f "delims=" %%P in ('%PS% -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')"') do set "PATH=%%P;%SystemRoot%\System32;%SystemRoot%\System32\WindowsPowerShell\v1.0"
 
 echo.
 echo [2/4] Running user account creation...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\01_create_user.ps1" %PC_ARG%
+"%PS%" -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\01_create_user.ps1" %PC_ARG%
 if %errorLevel% neq 0 (
     echo [WARNING] User creation step encountered an issue.
 )
 
 echo.
 echo [3/4] Configuring VS Code environment...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\03_configure_vscode.ps1" %PC_ARG%
+"%PS%" -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\03_configure_vscode.ps1" %PC_ARG%
 if %errorLevel% neq 0 (
     echo [WARNING] VS Code configuration encountered an issue.
 )

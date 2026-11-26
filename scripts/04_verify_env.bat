@@ -37,12 +37,14 @@ echo ------------------------------------------------------------
 :: C
 where gcc >nul 2>&1
 if errorlevel 1 goto :skip_c
-gcc "%TEST_DIR%\test.c" -o "%TEMP_DIR%\test_c.exe" >nul 2>&1
+gcc "%TEST_DIR%\test.c" -o "%TEMP_DIR%\test_c.exe" >"%TEMP_DIR%\c_err.txt" 2>&1
 if exist "%TEMP_DIR%\test_c.exe" (
     "%TEMP_DIR%\test_c.exe"
     echo   [PASS] C compilation and execution succeeded.
 ) else (
     echo   [FAIL] C compilation failed.
+    for /f "delims=" %%W in ('where gcc 2^>nul') do echo          where gcc: %%W
+    type "%TEMP_DIR%\c_err.txt"
     set /a FAIL_COUNT+=1
 )
 :skip_c
@@ -50,12 +52,14 @@ if exist "%TEMP_DIR%\test_c.exe" (
 :: C++
 where g++ >nul 2>&1
 if errorlevel 1 goto :skip_cpp
-g++ -std=c++17 "%TEST_DIR%\test.cpp" -o "%TEMP_DIR%\test_cpp.exe" >nul 2>&1
+g++ -std=c++17 "%TEST_DIR%\test.cpp" -o "%TEMP_DIR%\test_cpp.exe" >"%TEMP_DIR%\cpp_err.txt" 2>&1
 if exist "%TEMP_DIR%\test_cpp.exe" (
     "%TEMP_DIR%\test_cpp.exe"
     echo   [PASS] C++ STL compilation and execution succeeded.
 ) else (
     echo   [FAIL] C++ compilation failed.
+    for /f "delims=" %%W in ('where g++ 2^>nul') do echo          where g++: %%W
+    type "%TEMP_DIR%\cpp_err.txt"
     set /a FAIL_COUNT+=1
 )
 :skip_cpp

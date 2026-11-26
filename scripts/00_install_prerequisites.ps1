@@ -98,26 +98,31 @@ if ($codeExe) {
 # -------------------------------------------------------------
 Write-Host "`n[2/5] Checking C/C++ compilers (GCC & G++)..." -ForegroundColor Yellow
 $gccDirs = @('C:\mingw64\bin', 'C:\winlibs\mingw64\bin', 'C:\msys64\ucrt64\bin', 'C:\msys64\mingw64\bin',
-             'C:\MinGW\bin', 'C:\winlibs\bin', 'D:\msys64\ucrt64\bin', 'D:\MinGW\bin',
-             "$env:ProgramFiles\WinGet\Packages\BrechtSanders.WinLibs*\mingw64\bin")
+             'C:\MinGW\bin', 'C:\winlibs\bin', 'D:\msys64\ucrt64\bin', 'D:\MinGW\bin')
 
 function Find-SharedGpp { Find-SharedExe 'g++.exe' $gccDirs }
 
-$gpp = Find-SharedGpp
-if (-not $gpp) {
-    # (a) A copy exists but only inside a user profile (winget per-user install) -> copy it to C:\mingw64
-    $private = Get-ChildItem -Path "$script:UsersRoot\*\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs*\mingw64\bin\g++.exe" -ErrorAction SilentlyContinue |
-        Select-Object -First 1
-    if ($private) {
-        $root = Split-Path -Parent (Split-Path -Parent $private.FullName)    # ...\mingw64
-        Write-Host "  [FIX] GCC found only inside a user profile: $root" -ForegroundColor Yellow
-        Write-Host "        Copying it to C:\mingw64 so every account can use it (1-2 minutes)..." -ForegroundColor Yellow
-        robocopy $root 'C:\mingw64' /E /NFL /NDL /NJH /NJS /NC /NS /NP | Out-Null
-        $gpp = Find-SharedGpp
+# Clean out any broken WinLibs path containing spaces (e.g. C:\Program Files\WinGet\Packages\...)
+# because MinGW ld.exe splits spaces when passing default-manifest.o.
+$curSysPath = [Environment]::GetEnvironmentVariable('Path', 'Machine')
+if ($curSysPath) {
+    $cleanedSys = ($curSysPath -split ';' | Where-Object { $_ -and $_ -notmatch 'Program Files\\WinGet\\Packages\\BrechtSanders\.WinLibs' }) -join ';'
+    if ($cleanedSys -ne $curSysPath) {
+        [Environment]::SetEnvironmentVariable('Path', $cleanedSys, 'Machine')
+        Update-SessionPath
     }
 }
+
+function Copy-WinLibsToRoot([string]$SourceGppExe) {
+    $root = Split-Path -Parent (Split-Path -Parent $SourceGppExe)    # ...\mingw64
+    Write-Host "  [FIX] Copying WinLibs from '$root' to 'C:\mingw64' (no spaces in path)..." -ForegroundColor Yellow
+    robocopy $root 'C:\mingw64' /E /NFL /NDL /NJH /NJS /NC /NS /NP | Out-Null
+    return (Find-SharedGpp)
+}
+
+$gpp = Find-SharedGpp
 if (-not $gpp) {
-    # (b) Offline zip on the USB stick
+    # (a) Offline zip on the USB stick -> extracts directly to C:\mingw64
     $zip = Get-ChildItem -Path (Join-Path $installersDir 'winlibs*.zip') -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($zip) {
         Write-Host "  [OFFLINE] Extracting $($zip.Name) to C:\ ..." -ForegroundColor Cyan
@@ -125,19 +130,25 @@ if (-not $gpp) {
         $gpp = Find-SharedGpp
     }
 }
+if (-not $gpp) {
+    # (b) Copy exists from WinGet (either in Program Files with spaces, or in a user profile) -> copy to C:\mingw64
+    $wgGpp = Get-ChildItem -Path @(
+        "$env:ProgramFiles\WinGet\Packages\BrechtSanders.WinLibs*\mingw64\bin\g++.exe",
+        "$script:UsersRoot\*\AppData\Local\Microsoft\WinGet\Packages\BrechtSanders.WinLibs*\mingw64\bin\g++.exe"
+    ) -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($wgGpp) {
+        $gpp = Copy-WinLibsToRoot $wgGpp.FullName
+    }
+}
 if (-not $gpp -and $canDownload) {
-    # (c) Download - machine scope puts it in C:\Program Files\WinGet\Packages (readable by everyone)
+    # (c) Download via winget, then copy to C:\mingw64 so path has no spaces and is readable by all users
     Invoke-WingetInstall 'BrechtSanders.WinLibs.POSIX.UCRT'
-    $gpp = Find-SharedGpp
-    if (-not $gpp) {
-        # Some winget versions ignore --scope for zip packages and install per-user anyway.
-        $private = Get-ChildItem -Path "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\BrechtSanders.WinLibs*\mingw64\bin\g++.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($private) {
-            $root = Split-Path -Parent (Split-Path -Parent $private.FullName)
-            Write-Host "  [FIX] winget installed GCC per-user; copying to C:\mingw64..." -ForegroundColor Yellow
-            robocopy $root 'C:\mingw64' /E /NFL /NDL /NJH /NJS /NC /NS /NP | Out-Null
-            $gpp = Find-SharedGpp
-        }
+    $wgGpp = Get-ChildItem -Path @(
+        "$env:ProgramFiles\WinGet\Packages\BrechtSanders.WinLibs*\mingw64\bin\g++.exe",
+        "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\BrechtSanders.WinLibs*\mingw64\bin\g++.exe"
+    ) -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($wgGpp) {
+        $gpp = Copy-WinLibsToRoot $wgGpp.FullName
     }
 }
 if ($gpp) {

@@ -5,11 +5,13 @@ setlocal EnableDelayedExpansion
 :: ICPC Lab Workstation - Network Lockdown Launcher (Phase 2)
 :: -------------------------------------------------------------
 
+set "PS=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+
 :: 1. Check for Administrative Privileges and Auto-Elevate
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo [INFO] Administrative permissions required. Requesting elevation...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    "%PS%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
 )
 
@@ -79,7 +81,7 @@ if /i not "%CONFIRM%"=="Y" (
 )
 
 echo.
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\02_lockdown_network.ps1" -ServerIP "%DOMSERVER_IP%"
+"%PS%" -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\02_lockdown_network.ps1" -ServerIP "%DOMSERVER_IP%"
 if %errorLevel% neq 0 (
     echo [WARNING] Network lockdown encountered an issue.
 )

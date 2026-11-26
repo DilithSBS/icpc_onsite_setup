@@ -36,7 +36,7 @@ $existingUser = Get-LocalUser -Name $Username -ErrorAction SilentlyContinue
 try {
     if ($null -ne $existingUser) {
         Write-Host "[INFO] User '$Username' already exists. Updating password..." -ForegroundColor Yellow
-        Set-LocalUser -Name $Username -Password $secPassword -PasswordNeverExpires $true -UserMayChangePassword $false -ErrorAction Stop
+        Set-LocalUser -Name $Username -FullName $fullName -Password $secPassword -PasswordNeverExpires $true -UserMayChangePassword $false -ErrorAction Stop
         Enable-LocalUser -Name $Username -ErrorAction SilentlyContinue
         Write-Host "[OK] Existing user '$Username' updated." -ForegroundColor Green
     }

@@ -130,6 +130,8 @@ def main():
             if not ok: overall_pass = False
         else:
             print("  [C++]    [FAIL] Could not compile C++ test suite!")
+            if c_compile.stderr:
+                print(c_compile.stderr.decode(errors="replace").strip())
             overall_pass = False
 
         # 2. Test C
@@ -141,6 +143,8 @@ def main():
             if not ok: overall_pass = False
         else:
             print("  [C]      [FAIL] Could not compile C test suite!")
+            if c_compile.stderr:
+                print(c_compile.stderr.decode(errors="replace").strip())
             overall_pass = False
 
         # 3. Test Java

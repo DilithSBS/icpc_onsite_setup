@@ -50,8 +50,8 @@ function Resolve-ContestAccount {
         return $acct
     }
     $acct.Username    = $row.username
-    $acct.Password    = $row.password
-    $acct.FullName    = "$($row.team_name) ($($row.institution))"
+    $acct.Password    = $Password
+    $acct.FullName    = $row.username
     $acct.TeamDisplay = "$($row.team_name) - $($row.institution)"
     $acct.Seat        = $seat
     return $acct
