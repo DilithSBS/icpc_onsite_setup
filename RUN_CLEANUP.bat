@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 
 :: -------------------------------------------------------------
 :: ICPC Lab Workstation Teardown / Cleanup Launcher
@@ -7,7 +7,7 @@ setlocal
 
 :: Check for Administrative Privileges and Auto-Elevate
 net session >nul 2>&1
-if errorlevel 1 (
+if %errorLevel% neq 0 (
     echo [INFO] Administrative permissions required. Requesting elevation...
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /b
@@ -17,15 +17,16 @@ cd /d "%~dp0"
 
 cls
 echo ============================================================
-echo         ICPC LAB TEARDOWN ^& RECOVERY SCRIPT
+echo         ICPC LAB TEARDOWN AND RECOVERY SCRIPT
 echo ============================================================
 echo.
 echo WARNING: This script will:
-echo   1. Remove the contestant / team accounts and their profiles
-echo   2. Restore the firewall exactly as it was before setup
-echo   3. Restore normal Internet, LAN and Wi-Fi access
-echo   4. Restore Windows Update services, tasks and policies
-echo   5. Disable automatic contestant login
+echo   1. Remove the contestant user account and files
+echo   2. Reset Windows Firewall to default operating system state
+echo   3. Restore normal Internet and LAN access
+echo   4. Re-enable Wi-Fi network adapters
+echo   5. Re-enable Windows Update services
+echo   6. Disable automatic contestant login
 echo.
 echo ============================================================
 echo.
@@ -43,10 +44,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\99_cleanup_lab
 
 echo.
 echo ============================================================
-echo               CLEANUP FINISHED
+echo               CLEANUP COMPLETED SUCCESSFULLY
 echo ============================================================
-echo The PC has been restored to the default university lab state.
-echo Restart the PC to finish re-enabling Windows Update.
+echo The PC has been restored to default university lab state.
 echo.
 pause
-

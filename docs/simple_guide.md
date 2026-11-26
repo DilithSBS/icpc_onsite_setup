@@ -78,4 +78,5 @@ The script will automatically:
 - Delete the contestant user account and files.
 - Reset the firewall and restore normal internet access.
 - Re-enable any Wi-Fi adapters.
-- Restore Windows Updates exactly as before (restart the PC afterwards).
+- Re-enable Windows Updates.
+
