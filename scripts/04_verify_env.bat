@@ -108,6 +108,12 @@ call code --list-extensions > "%TEMP_DIR%\ext.txt" 2>nul
 for /f "usebackq eol=# tokens=*" %%E in ("%EXT_FILE%") do call :check_ext %%E
 :skip_ext
 
+if /i "%~2"=="skip_network" (
+    echo.
+    echo [5] Network Security ^& Isolation: SKIPPED ^(run RUN_LOCKDOWN.bat later^).
+    goto skip_net
+)
+
 echo.
 echo [5] Checking Network Security ^& Isolation:
 echo ------------------------------------------------------------
@@ -134,6 +140,7 @@ if errorlevel 1 (
     echo   [PASS] Internet is BLOCKED - no outside connection possible.
 )
 
+:skip_net
 :: Cleanup
 rmdir /s /q "%TEMP_DIR%" >nul 2>&1
 

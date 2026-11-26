@@ -8,7 +8,8 @@ This guide is designed for organizers and student volunteers setting up the 60 c
 
 | Action | Script to Run | Time Needed |
 | :--- | :--- | :--- |
-| **Setup PC for Contest** | Double-click `RUN_SETUP.bat` | ~3-5 minutes per PC (first PC longer: downloads) |
+| **Phase 1: Setup Accounts & Tools** | Double-click `RUN_SETUP.bat` | ~3-5 minutes per PC (first PC longer: downloads) |
+| **Phase 2: Lockdown Network** | Double-click `RUN_LOCKDOWN.bat` | ~5 seconds per PC |
 | **Restore PC After Contest** | Double-click `RUN_CLEANUP.bat` | ~10 seconds per PC |
 
 ---
@@ -24,21 +25,34 @@ This guide is designed for organizers and student volunteers setting up the 60 c
 2. Double-click **`RUN_SETUP.bat`** (or right-click $\rightarrow$ **Run as administrator**).
 3. If Windows asks for permission (UAC prompt), click **Yes**.
 
-### Step 3: Answer Two Prompts
+### Step 3: Answer Three Prompts
 * When asked: `Proceed with setup on this workstation? (Y/N):`  
   👉 Type **`Y`** and press **Enter**.
+* When asked: `Which Lab is this PC in? (1, 2, or 3):`  
+  👉 Type **`1`**, **`2`**, or **`3`** (configured in `config.bat`) and press **Enter**.
 * When asked: `Enter Lab PC Number (1-60) for assigned team...:`  
   👉 Type the PC number (e.g., **`5`** for Lab PC #5) and press **Enter**.  
   *(Or just press **Enter** without a number if you want the generic `contestant` account).*
 
-### That's it!
+### That's it for Phase 1!
 The script will automatically:
-- [x] Install missing compilers for ALL accounts and prepare the VS Code language extensions.
+- [x] Install VS Code, WinLibs GCC/G++, JDK 21, and Python 3.12 from `installers\` (completely offline!).
 - [x] Create the team's account (and its profile) with their password.
-- [x] Disable Wi-Fi and block internet (locking network strictly to DOMjudge).
-- [x] Freeze Windows Updates.
 - [x] Install VS Code settings, extensions (Code Runner, C/C++, Python, Java) and the desktop workspace into the team's account.
-- [x] Run 120 automated test cases and an internet-leak test - as Administrator AND inside the team's account.
+- [x] Run 120 automated test cases (30 per language) to verify all compilers.
+
+---
+
+## 🔒 Part 2: Lockdown Network Before Contest (`RUN_LOCKDOWN.bat`)
+
+Run this right before the contest starts (with the lab's WAN uplink unplugged):
+1. Double-click **`RUN_LOCKDOWN.bat`** as Administrator.
+2. Press **Enter** to confirm the Lab remembered from Phase 1 (or type `1`, `2`, or `3`).
+3. Type **`Y`** and press **Enter**.
+   * Turns **OFF** Windows Firewall across all profiles.
+   * Disables any Wi-Fi adapters.
+   * Disables Windows Update services.
+   * Verifies DOMserver reachability and offline isolation.
 
 When it prints **`SETUP FINISHED - ALL STEPS OK`**, press any key, remove the USB drive, and move to the next PC.
 If it prints **`SETUP FINISHED WITH PROBLEMS IN: ...`**, scroll up to the red lines (see `docs/troubleshooting.md`) and run it again.

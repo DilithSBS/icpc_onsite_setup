@@ -25,3 +25,6 @@ teams.txt
 
 # Local VS Code configuration
 /configs/vscode/
+
+# Large offline installers & cached VS Code extensions
+installers/

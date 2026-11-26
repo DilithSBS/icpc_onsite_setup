@@ -28,8 +28,10 @@ A production-ready automation toolkit and operational runbook for configuring 60
 
 ```text
 .
-├── RUN_SETUP.bat             # 1-Click Master Setup Launcher (Self-elevates as Admin)
-├── RUN_CLEANUP.bat           # 1-Click Post-Contest Teardown Launcher
+├── config.bat                # Central 3-lab DOMjudge server IP configuration
+├── RUN_SETUP.bat             # Phase 1: Accounts, offline installers, VS Code & compiler tests
+├── RUN_LOCKDOWN.bat          # Phase 2: Turn OFF firewalls, disable Wi-Fi & Windows Updates
+├── RUN_CLEANUP.bat           # Post-Contest Teardown Launcher
 ├── configs/
 │   ├── test_programs/        # Test source files & 30-case validation programs
 │   │   ├── suite_c.c         # C 30-test suite program
@@ -48,7 +50,7 @@ A production-ready automation toolkit and operational runbook for configuring 60
 │   ├── network-topology.md   # Subnets, IP plans, and physical air-gap diagrams
 │   ├── simple_guide.md       # 1-page quickstart setup guide for volunteers
 │   └── troubleshooting.md    # Solutions for compiler PATHs, WindowsApps stubs, etc.
-├── installers/               # (optional) offline files: winlibs*.zip, vscode-extensions\ (auto-filled)
+├── installers/               # (optional) offline files: VSCodeSetup*.exe, winlibs*.zip, *jdk*.msi, python*.exe, vscode-extensions\
 └── scripts/
     ├── common.ps1                   # Shared helpers (machine-wide PATH, profiles, run-as-SYSTEM)
     ├── 00_install_prerequisites.ps1 # Machine-wide compilers, VS Code + extension cache
@@ -68,37 +70,32 @@ A production-ready automation toolkit and operational runbook for configuring 60
 
 ## 🚀 Quick Start Guide (Contest Setup)
 
-### Step 1: Configure Your DOMjudge Server IP
-Open **[RUN_SETUP.bat](file:///d:/UoP/ICPC2026/icpc_onsite_setup/RUN_SETUP.bat)** and set your DOMjudge server's exact IP at line 6:
+### Step 1: Configure Your 3 Lab DOMjudge Server IPs
+Open **[config.bat](file:///d:/UoP/ICPC2026/icpc_onsite_setup/config.bat)** and set the DOMserver IP address for each of your 3 labs:
 ```bat
-:: Set your DOMjudge / Contest Server IP below:
-set "DOMSERVER_IP=192.168.1.100"
+set "LAB1_DOMSERVER_IP=192.168.1.100"
+set "LAB2_DOMSERVER_IP=192.168.2.100"
+set "LAB3_DOMSERVER_IP=192.168.3.100"
 ```
 
 ---
 
-### Step 2: Deploy to the 60 Workstations
-
+### Step 2: Phase 1 — Setup PCs (`RUN_SETUP.bat`)
+Run this while the lab still has internet access so any missing compilers and extensions can install:
 1. Copy this repository to **3–4 fast USB flash drives**.
-2. Assign 2 volunteers per row in the computer lab.
-3. Plug in the USB drive, right-click **`RUN_SETUP.bat`** and select **Run as administrator**.
-4. Confirm with `Y`.
-5. When prompted:
-   ```text
-   Enter Lab PC Number (1-60) for assigned team, or press ENTER for standard 'contestant': 
-   ```
-   * Type the PC number (e.g., `5`) to automatically assign the official team username (e.g. `ICPCLK26_G022`), team name, and password.
-   * Or press **ENTER** to create the standard `contestant` account.
-6. The setup runs through 7 automated phases (the first PC needs internet to download tools and extensions; it takes longer):
-   * **[1/7]** Installs missing toolchains machine-wide and prepares the VS Code extension cache.
-   * **[2/7]** Provisions the team's Standard User account and creates its profile.
-   * **[3/7]** Locks down the firewall exclusively to `%DOMSERVER_IP%`.
-   * **[4/7]** Freezes Windows Update.
-   * **[5/7]** Installs settings, language extensions and the desktop workspace into the contestant account.
-   * **[6/7]** Runs the 120-test suite and network checks as Administrator.
-   * **[7/7]** Runs the same checks **inside the contestant account**.
-7. The last screen says either `ALL STEPS OK` or lists the failed steps. Only move on when it says `ALL STEPS OK`.
-8. If step 4 warns that a restart is pending, restart the PC and run setup again.
+2. Plug in the USB drive, right-click **`RUN_SETUP.bat`** and select **Run as administrator**.
+3. Confirm with `Y`.
+4. Select which Lab (`1`, `2`, or `3`) the PC is in.
+5. Enter the Lab PC Number (`1-60`) for the assigned team, or press **ENTER** for `contestant`.
+6. The script installs missing toolchains/Code Runner, creates the user account, configures VS Code, and verifies compilers & the 120-test suite (without locking down the network yet).
+
+---
+
+### Step 3: Phase 2 — Network Lockdown (`RUN_LOCKDOWN.bat`)
+Run this right before the contest (or after unplugging the lab's WAN uplink):
+1. Plug in the USB drive and run **`RUN_LOCKDOWN.bat`** as Administrator.
+2. Press **ENTER** to confirm the Lab detected from Phase 1 (or choose `1`, `2`, or `3`).
+3. The script turns **OFF** Windows Firewall across all profiles, disables any Wi-Fi adapters, disables Windows Updates, and verifies DOMserver reachability and offline isolation.
 
 ---
 

@@ -32,9 +32,11 @@ if (Test-Path -LiteralPath $fwBackup) {
 } else {
     Write-Host "[INFO] No firewall backup found - resetting firewall to factory defaults..." -ForegroundColor Yellow
     netsh advfirewall reset | Out-Null
-    Write-Host "[OK] Windows Firewall reset to default." -ForegroundColor Green
+    Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled True -ErrorAction SilentlyContinue
+    Write-Host "[OK] Windows Firewall reset and enabled." -ForegroundColor Green
 }
 Remove-NetFirewallRule -DisplayName "ICPC-*" -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "C:\ProgramData\icpc_lab_config.bat" -Force -ErrorAction SilentlyContinue
 
 # 2. Windows Update ---------------------------------------------
 Write-Host "[INFO] Restoring Windows Update..." -ForegroundColor Yellow

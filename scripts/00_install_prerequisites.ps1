@@ -15,8 +15,11 @@
       and that the folder is on the SYSTEM PATH (which every account gets at logon).
 
     Offline support (optional, put on the USB stick next to RUN_SETUP.bat):
-        installers\winlibs*.zip            WinLibs GCC zip (extracted to C:\mingw64)
-        installers\vscode-extensions\      extension cache (auto-created after the first online PC)
+        installers\VSCodeSetup*.exe         VS Code System Installer (64-bit)
+        installers\winlibs*.zip             WinLibs GCC zip (extracted to C:\mingw64)
+        installers\*jdk*.msi (or *.exe)     OpenJDK / Temurin JDK installer
+        installers\python*.exe              Official Python installer (all-users)
+        installers\vscode-extensions\       extension cache (auto-created after the first online PC)
 #>
 
 . "$PSScriptRoot\common.ps1"
@@ -69,7 +72,15 @@ if (-not $codeExe) {
     if ($userCopy) {
         Write-Host "  [NOTE] Found a per-user VS Code at $($userCopy.FullName) - the contestant cannot use it." -ForegroundColor Yellow
     }
-    if ($canDownload) {
+    $vsInstaller = Get-ChildItem -Path $installersDir -Filter '*.exe' -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -like 'VSCodeSetup*.exe' -or $_.Name -like '*Visual Studio Code*Machine*.exe' } |
+        Select-Object -First 1
+    if ($vsInstaller) {
+        Write-Host "  [OFFLINE] Installing VS Code from $($vsInstaller.Name)..." -ForegroundColor Cyan
+        Start-Process -FilePath $vsInstaller.FullName -ArgumentList '/VERYSILENT /NORESTART /MERGETASKS=!runcode,addtopath' -Wait
+        Update-SessionPath
+        $codeExe = Get-VSCodeSystemExe
+    } elseif ($canDownload) {
         Invoke-WingetInstall 'Microsoft.VisualStudioCode' @('--override', '/VERYSILENT /NORESTART /MERGETASKS=!runcode,addtopath')
         $codeExe = Get-VSCodeSystemExe
     }
@@ -145,9 +156,23 @@ if ($gpp) {
 Write-Host "`n[3/5] Checking Java JDK (javac & java)..." -ForegroundColor Yellow
 $jdkDirs = @("$env:ProgramFiles\Eclipse Adoptium\jdk-*\bin", "$env:ProgramFiles\Java\jdk*\bin", "$env:ProgramFiles\Microsoft\jdk-*\bin")
 $javac = Find-SharedExe 'javac.exe' $jdkDirs
-if (-not $javac -and $canDownload) {
-    Invoke-WingetInstall 'EclipseAdoptium.Temurin.21.JDK'
-    $javac = Find-SharedExe 'javac.exe' $jdkDirs
+if (-not $javac) {
+    $jdkMsi = Get-ChildItem -Path (Join-Path $installersDir '*jdk*.msi') -ErrorAction SilentlyContinue | Select-Object -First 1
+    $jdkExe = Get-ChildItem -Path (Join-Path $installersDir '*jdk*.exe') -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($jdkMsi) {
+        Write-Host "  [OFFLINE] Installing JDK from $($jdkMsi.Name)..." -ForegroundColor Cyan
+        Start-Process -FilePath 'msiexec.exe' -ArgumentList "/i `"$($jdkMsi.FullName)`" /quiet /norestart ADDLOCAL=FeatureMain,FeatureEnvironment,FeatureJarFileRunWith,FeatureJavaHome" -Wait
+        Update-SessionPath
+        $javac = Find-SharedExe 'javac.exe' $jdkDirs
+    } elseif ($jdkExe) {
+        Write-Host "  [OFFLINE] Installing JDK from $($jdkExe.Name)..." -ForegroundColor Cyan
+        Start-Process -FilePath $jdkExe.FullName -ArgumentList '/s' -Wait
+        Update-SessionPath
+        $javac = Find-SharedExe 'javac.exe' $jdkDirs
+    } elseif ($canDownload) {
+        Invoke-WingetInstall 'EclipseAdoptium.Temurin.21.JDK'
+        $javac = Find-SharedExe 'javac.exe' $jdkDirs
+    }
 }
 if ($javac) {
     Add-ToMachinePath (Split-Path -Parent $javac)
@@ -167,13 +192,21 @@ if (-not $python) {
     $private = Get-ChildItem -Path "$script:UsersRoot\*\AppData\Local\Programs\Python\Python3*\python.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($private) { Write-Host "  [NOTE] Found a per-user Python at $($private.FullName) - the contestant cannot use it." -ForegroundColor Yellow }
 }
-if (-not $python -and $canDownload) {
-    # If 3.12 is already installed "just for me", the 3.12 installer refuses to add an all-users
-    # copy, so fall back to the next version.
-    foreach ($pyId in @('Python.Python.3.12', 'Python.Python.3.13')) {
-        Invoke-WingetInstall $pyId @('--override', '/quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1 Include_test=0')
+if (-not $python) {
+    $pyInstaller = Get-ChildItem -Path (Join-Path $installersDir 'python*.exe') -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($pyInstaller) {
+        Write-Host "  [OFFLINE] Installing Python (all-users) from $($pyInstaller.Name)..." -ForegroundColor Cyan
+        Start-Process -FilePath $pyInstaller.FullName -ArgumentList '/quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1 Include_test=0' -Wait
+        Update-SessionPath
         $python = Find-SharedExe 'python.exe' $pyDirs
-        if ($python) { break }
+    } elseif ($canDownload) {
+        # If 3.12 is already installed "just for me", the 3.12 installer refuses to add an all-users
+        # copy, so fall back to the next version.
+        foreach ($pyId in @('Python.Python.3.12', 'Python.Python.3.13')) {
+            Invoke-WingetInstall $pyId @('--override', '/quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1 Include_test=0')
+            $python = Find-SharedExe 'python.exe' $pyDirs
+            if ($python) { break }
+        }
     }
 }
 if ($python) {
