@@ -10,10 +10,10 @@ This checklist is designed for the technical committee organizing ICPC programmi
   - Verify OS on all 60 machines (Windows 10 / 11 64-bit).
   - Verify hardware: Ensure all monitors, keyboards, mice, and LAN cables function properly.
 - [ ] **Configure Master Repository & Settings:**
-  - Open `config.bat` and configure the DOMserver IP for all 3 labs (`LAB1_DOMSERVER_IP`, `LAB2_DOMSERVER_IP`, `LAB3_DOMSERVER_IP`).
   - Verify `installers\` contains the 4 offline installers (VS Code, WinLibs GCC zip, JDK 21 MSI, Python 3.12 EXE).
   - Verify `teams.txt` contains the finalized list of 60 official participating teams.
   - Run `python scripts/generate_credentials.py` to generate the matching `contestant_credentials.txt` and `contestant_credentials.csv`.
+  - *(Note: You can leave placeholder IPs in `config.bat` during Phase 1 and fill in the 3 real DOMserver IPs on lockdown day).*
 - [ ] **Print Contestant Desk Slips:**
   - Print `contestant_credentials.txt` and cut it into 60 slips containing Team Name, PC Number, official Username, and Password.
 - [ ] **Contest Server Preparation:**
@@ -42,13 +42,15 @@ This checklist is designed for the technical committee organizing ICPC programmi
     - [x] Official team user account created with Standard User restrictions.
     - [x] VS Code settings, Code Runner, and desktop workspace configured.
     - [x] **30/30 test cases passed for C, C++, Java, and Python** (120/120 total).
-- [ ] **Execute Phase 2 (`RUN_LOCKDOWN.bat`) before Contest:**
+- [ ] **Execute Phase 2 (`RUN_LOCKDOWN.bat`) & Verify (`RUN_VERIFY.bat`) before Contest:**
+  - Update `config.bat` on the USB drives with the **real DOMserver IPs** for Lab 1, Lab 2, and Lab 3.
   - Run `RUN_LOCKDOWN.bat` as Administrator (press Enter to confirm the saved Lab).
+  - Run `RUN_VERIFY.bat` as Administrator to test Code Runner, all 120 compiler tests, DOMserver reachability, and internet isolation **from inside the contestant account**.
   - Verify:
     - [x] Windows Firewall turned OFF on all profiles.
     - [x] Wi-Fi adapters disabled.
     - [x] Windows Updates disabled.
-    - [x] Contest server ping SUCCEEDS & external internet ping (`8.8.8.8`) is BLOCKED.
+    - [x] Contest server ping SUCCEEDS & outbound internet is BLOCKED.
 - [ ] **Contestant Account Check:**
   - Log into the newly created team account (or switch user).
   - Open VS Code via the desktop shortcut.

@@ -42,7 +42,7 @@ This document outlines the network topology and isolation plan for running an in
 
 ## 2. Recommended IP Addressing Plan (Per Lab)
 
-Update `config.bat` to match your actual DOMserver IP for each lab:
+On lockdown day (once the 3 DOMservers are up and their IPs are known), update `config.bat` on your USB drives before running `RUN_LOCKDOWN.bat`:
 
 | Lab | Role | Machine Count | Example IP / Range | Subnet Mask | Default Gateway |
 | :--- | :--- | :--- | :--- | :--- | :--- |

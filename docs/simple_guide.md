@@ -45,14 +45,14 @@ The script will automatically:
 
 ## 🔒 Part 2: Lockdown Network Before Contest (`RUN_LOCKDOWN.bat`)
 
-Run this right before the contest starts (with the lab's WAN uplink unplugged):
+Run this on contest day after the lab's internet cable is unplugged and the coordinator has updated `config.bat` with the 3 real DOMserver IPs:
 1. Double-click **`RUN_LOCKDOWN.bat`** as Administrator.
 2. Press **Enter** to confirm the Lab remembered from Phase 1 (or type `1`, `2`, or `3`).
 3. Type **`Y`** and press **Enter**.
    * Turns **OFF** Windows Firewall across all profiles.
    * Disables any Wi-Fi adapters.
    * Disables Windows Update services.
-   * Verifies DOMserver reachability and offline isolation.
+   * Reads the latest DOMserver IP from `config.bat` and verifies DOMserver reachability and offline isolation.
 
 When it prints **`SETUP FINISHED - ALL STEPS OK`**, press any key, remove the USB drive, and move to the next PC.
 If it prints **`SETUP FINISHED WITH PROBLEMS IN: ...`**, scroll up to the red lines (see `docs/troubleshooting.md`) and run it again.

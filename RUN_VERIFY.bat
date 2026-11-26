@@ -33,11 +33,16 @@ echo   2. Run all 120 test cases (30 each: C, C++, Java, Python)
 echo   3. Verify VS Code extensions (Code Runner, C/C++, Java, Python)
 echo   4. Verify outbound Internet is OFF and DOMserver is reachable
 echo.
+echo Available Labs from config.bat:
+echo   [1] %LAB1_NAME% - DOMserver IP: %LAB1_DOMSERVER_IP%
+echo   [2] %LAB2_NAME% - DOMserver IP: %LAB2_DOMSERVER_IP%
+echo   [3] %LAB3_NAME% - DOMserver IP: %LAB3_DOMSERVER_IP%
+echo.
 
 set "SAVED_LAB="
 if exist "C:\ProgramData\icpc_lab_config.bat" (
     call "C:\ProgramData\icpc_lab_config.bat"
-    echo [DETECTED] Saved Lab: Lab !SAVED_LAB! ^(!DOMSERVER_IP!^)
+    echo [DETECTED] Saved Lab from setup/lockdown: Lab !SAVED_LAB!
 )
 
 set "LAB_CHOICE="
@@ -59,6 +64,9 @@ if "%LAB_CHOICE%"=="1" (
     pause
     exit /b 1
 )
+
+echo [INFO] Using DOMserver IP from config.bat: %DOMSERVER_IP%
+echo.
 
 set "PC_NUM="
 set /p PC_NUM="Enter Lab PC Number (1-60) for assigned team, or press ENTER for 'contestant': "
