@@ -12,6 +12,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+
 # Local logs
 *.log
 
@@ -21,3 +22,6 @@ $RECYCLE.BIN/
 contestant_credentials.txt
 contestant_credentials.csv
 teams.txt
+
+# Local VS Code configuration
+/configs/vscode/
